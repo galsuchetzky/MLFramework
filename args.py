@@ -1,30 +1,44 @@
-"""Command-line arguments for setup.py, train.py, test.py.
+"""
+Command-line arguments for setup.py, train.py, test.py.
 
 Author:
     Chris Chute (chute@stanford.edu)
+Edited by:
+    Gal Suchetzky (galsuchetzky@gmail.com)
 """
 
 import argparse
 
 
+# TODO: This file includes all the command-line arguments and their default values. edit it for your needs to make
+#  the running of your system the coms convenient for you.
+
+
 def get_setup_args():
     """Get arguments needed in setup.py."""
-    parser = argparse.ArgumentParser('Download and pre-process SQuAD')
+    parser = argparse.ArgumentParser('Download and pre-process the dataset')
 
     add_common_args(parser)
 
+    # TODO: add the URLs needed for your project, remove or add arguments as needed.
+    #  Note: if all are downloaded from one of the URLs, the function setup.url_to_data_path converts the URLs to path.
     parser.add_argument('--train_url',
                         type=str,
-                        default='https://github.com/chrischute/squad/data/train-v2.0.json')
+                        default='')  # TODO: edit this
     parser.add_argument('--dev_url',
                         type=str,
-                        default='https://github.com/chrischute/squad/data/dev-v2.0.json')
+                        default='')  # TODO: edit this
     parser.add_argument('--test_url',
                         type=str,
-                        default='https://github.com/chrischute/squad/data/test-v2.0.json')
-    parser.add_argument('--glove_url',
+                        default='')  # TODO: edit this
+    parser.add_argument('--glove_url',  # TODO: may want to change this for other embeddings or remove completely.
                         type=str,
-                        default='http://nlp.stanford.edu/data/glove.840B.300d.zip')
+                        default='')  # TODO: edit this
+
+    """
+    More arguments can be added according to need.
+    
+    examples:
     parser.add_argument('--dev_meta_file',
                         type=str,
                         default='./data/dev_meta.json')
@@ -76,6 +90,7 @@ def get_setup_args():
                         type=int,
                         default=16,
                         help='Max number of chars to keep from a word')
+    """
     parser.add_argument('--include_test_examples',
                         type=lambda s: s.lower().startswith('t'),
                         default=True,
@@ -88,11 +103,12 @@ def get_setup_args():
 
 def get_train_args():
     """Get arguments needed in train.py."""
-    parser = argparse.ArgumentParser('Train a model on SQuAD')
+    parser = argparse.ArgumentParser('Train a model on the dataset')
 
     add_common_args(parser)
     add_train_test_args(parser)
 
+    # TODO: edit the default values here according to your project!
     parser.add_argument('--eval_steps',
                         type=int,
                         default=50000,
@@ -116,7 +132,7 @@ def get_train_args():
     parser.add_argument('--metric_name',
                         type=str,
                         default='F1',
-                        choices=('NLL', 'EM', 'F1'),
+                        choices=('NLL', 'EM', 'F1'),  # Todo: edit this to the matrices you use.
                         help='Name of dev metric to determine best checkpoint.')
     parser.add_argument('--max_checkpoints',
                         type=int,
@@ -137,6 +153,9 @@ def get_train_args():
 
     args = parser.parse_args()
 
+    # TODO: Remove if not needed.
+    """
+    possible logic according to the metric:
     if args.metric_name == 'NLL':
         # Best checkpoint is the one that minimizes negative log-likelihood
         args.maximize_metric = False
@@ -145,13 +164,14 @@ def get_train_args():
         args.maximize_metric = True
     else:
         raise ValueError(f'Unrecognized metric name: "{args.metric_name}"')
+    """
 
     return args
 
 
 def get_test_args():
     """Get arguments needed in test.py."""
-    parser = argparse.ArgumentParser('Test a trained model on SQuAD')
+    parser = argparse.ArgumentParser('Test a trained model on dataset')
 
     add_common_args(parser)
     add_train_test_args(parser)
@@ -161,21 +181,33 @@ def get_test_args():
                         default='dev',
                         choices=('train', 'dev', 'test'),
                         help='Split to use for testing.')
+
+    """
+    If a submission file is needed, here is a good place to put it.
+    
     parser.add_argument('--sub_file',
                         type=str,
                         default='submission.csv',
                         help='Name for submission file.')
+    """
 
     # Require load_path for test.py
     args = parser.parse_args()
     if not args.load_path:
-        raise argparse.ArgumentError('Missing required argument --load_path')
+        raise argparse.ArgumentError(args.load_path, 'Missing required argument --load_path')
 
     return args
 
 
 def add_common_args(parser):
     """Add arguments common to all 3 scripts: setup.py, train.py, test.py"""
+    # TODO: put here all arguments that are required for all scripts
+
+
+"""
+    More arguments can be added according to need.
+    
+    examples:
     parser.add_argument('--train_record_file',
                         type=str,
                         default='./data/train.npz')
@@ -200,19 +232,26 @@ def add_common_args(parser):
     parser.add_argument('--test_eval_file',
                         type=str,
                         default='./data/test_eval.json')
+"""
 
 
 def add_train_test_args(parser):
-    """Add arguments common to train.py and test.py"""
+    """
+    Add arguments common to train.py and test.py
+    """
     parser.add_argument('--name',
                         '-n',
                         type=str,
                         required=True,
                         help='Name to identify training or test run.')
+    """
+    example:
     parser.add_argument('--max_ans_len',
                         type=int,
                         default=15,
                         help='Maximum length of a predicted answer.')
+    """
+
     parser.add_argument('--num_workers',
                         type=int,
                         default=4,
@@ -226,14 +265,21 @@ def add_train_test_args(parser):
                         default=64,
                         help='Batch size per GPU. Scales automatically when \
                               multiple GPUs are available.')
+
+    # TODO: Remove if not needed.
+    """
     parser.add_argument('--use_squad_v2',
                         type=lambda s: s.lower().startswith('t'),
                         default=True,
                         help='Whether to use SQuAD 2.0 (unanswerable) questions.')
+    
+    
     parser.add_argument('--hidden_size',
                         type=int,
                         default=100,
                         help='Number of features in encoder hidden layers.')
+    """
+
     parser.add_argument('--num_visuals',
                         type=int,
                         default=10,

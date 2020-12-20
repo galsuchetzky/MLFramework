@@ -1,0 +1,11 @@
+This file explains roughly how to edit the framework's code in order to implement a project with it.
+There are code examples left commented out in the code, use them if needed and remember to remove what is not needed.
+Almost everywhere where editing is required, a TODO with explanation is found.
+
+1) Edit the args file to support all the required arguments for your project. This script is for convenience and can be
+altered later as well according to your needs.
+
+2) In the setup.py script:
+ a) Edit the download function to download the files needed - word vectors for example.
+ b) Edit the main part (bottom) and add to args anything required for the preprocess of your data.
+ b) Edit the pre_process - add preprocessing code for your data.

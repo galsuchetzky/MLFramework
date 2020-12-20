@@ -1,4 +1,4 @@
-name: squad
+name: MLFramework
 channels:
   - pytorch
   - conda-forge
