@@ -2,6 +2,8 @@
 
 Author:
     Chris Chute (chute@stanford.edu)
+Edited by:
+    Gal Suchetzky (galsuchetzky@gmail.com)
 """
 
 import numpy as np
@@ -21,7 +23,6 @@ from models import BiDAF
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 from ujson import load as json_load
-from util import collate_fn, SQuAD
 
 
 def main(args):

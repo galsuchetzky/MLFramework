@@ -9,3 +9,12 @@ altered later as well according to your needs.
  a) Edit the download function to download the files needed - word vectors for example.
  b) Edit the main part (bottom) and add to args anything required for the preprocess of your data.
  b) Edit the pre_process - add preprocessing code for your data.
+
+3) Edit the environment.yml file according to your project needs.
+
+4) Edit the util.py file:
+ a) add your utility functions and classes.
+ b) add a Dataset class that handles the example retreival.
+
+5) In test.py file:
+ a) update the dataset usage to use the dataset class from the utils file.

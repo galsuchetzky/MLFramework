@@ -1,4 +1,5 @@
-"""Test a model and generate submission CSV.
+"""
+Test a model (and generate submission CSV if requested).
 
 Usage:
     > python test.py --split SPLIT --load_path PATH --name NAME
@@ -9,6 +10,8 @@ Usage:
 
 Author:
     Chris Chute (chute@stanford.edu)
+Edited by:
+    Gal Suchetzky (galsuchetzky@gmail.com)
 """
 
 import csv
@@ -21,12 +24,14 @@ import util
 from args import get_test_args
 from collections import OrderedDict
 from json import dumps
-from models import BiDAF
 from os.path import join
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 from ujson import load as json_load
-from util import collate_fn, SQuAD
+from util import Dataset  # TODO: edit this after implementing the dataset class in utils!
+
+
+# TODO: import the models you want to test.
 
 
 def main(args):
@@ -37,14 +42,14 @@ def main(args):
     device, gpu_ids = util.get_available_devices()
     args.batch_size *= max(1, len(gpu_ids))
 
-    # Get embeddings
-    log.info('Loading embeddings...')
-    word_vectors = util.torch_from_json(args.word_emb_file)
+    # TODO: load whatever is needed for testing.
+    #  for example: embeddings, models, etc...
+    #  Dont forget to log.info(msg) whatever you do so it's clear to the user.
 
     # Get model
     log.info('Building model...')
-    model = BiDAF(word_vectors=word_vectors,
-                  hidden_size=args.hidden_size)
+    # TODO: load your model
+    model = None  # TODO: Edit this.
     model = nn.DataParallel(model, gpu_ids)
     log.info(f'Loading checkpoint from {args.load_path}...')
     model = util.load_model(model, args.load_path, gpu_ids, return_step=False)
@@ -54,23 +59,23 @@ def main(args):
     # Get data loader
     log.info('Building dataset...')
     record_file = vars(args)[f'{args.split}_record_file']
-    dataset = SQuAD(record_file, args.use_squad_v2)
+    dataset = Dataset()  # TODO: edit this according to your Dataset class!
     data_loader = data.DataLoader(dataset,
                                   batch_size=args.batch_size,
                                   shuffle=False,
-                                  num_workers=args.num_workers,
-                                  collate_fn=collate_fn)
+                                  num_workers=args.num_workers)
 
     # Evaluate
+    # TODO: adjust this code to evaluate your model.
     log.info(f'Evaluating on {args.split} split...')
     nll_meter = util.AverageMeter()
     pred_dict = {}  # Predictions for TensorBoard
-    sub_dict = {}   # Predictions for submission
+    sub_dict = {}  # Predictions for submission
     eval_file = vars(args)[f'{args.split}_eval_file']
     with open(eval_file, 'r') as fh:
         gold_dict = json_load(fh)
     with torch.no_grad(), \
-            tqdm(total=len(dataset)) as progress_bar:
+         tqdm(total=len(dataset)) as progress_bar:
         for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in data_loader:
             # Setup for forward
             cw_idxs = cw_idxs.to(device)
@@ -125,6 +130,7 @@ def main(args):
                        num_visuals=args.num_visuals)
 
     # Write submission file
+    # TODO: (gal) make this code optional.
     sub_path = join(args.save_dir, args.split + '_' + args.sub_file)
     log.info(f'Writing submission file to {sub_path}...')
     with open(sub_path, 'w', newline='', encoding='utf-8') as csv_fh:
