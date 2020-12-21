@@ -27,7 +27,7 @@ def get_setup_args():
 
     # TODO: add the URLs needed for your project, remove or add arguments as needed.
     #  Note: if all are downloaded from one of the URLs, the function setup.url_to_data_path converts the URLs to path.
-    parser.add_argument('--train_url',
+    parser.add_argument('--dataset_url',
                         type=str,
                         default=DEFAULT_TRAIN_URL)
     parser.add_argument('--dev_url',
@@ -39,6 +39,7 @@ def get_setup_args():
     parser.add_argument('--data_path',
                         type=str,
                         default=DEFAULT_DATA_PATH)
+
 
     """
     More arguments can be added according to need.

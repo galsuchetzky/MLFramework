@@ -22,12 +22,16 @@ TODOs:
 import os
 import ujson as json
 import urllib.request
+import csv
+import re
+import pandas as pd
 
 from Args import get_setup_args
 from codecs import open
 from tqdm import tqdm
 from zipfile import ZipFile
 from Config import SetupConfig
+
 
 
 # TODO: Add to this file any preprocess logic for your dataset or anything else.
@@ -114,6 +118,7 @@ def download(config):
             extracted_path = output_path.replace('.zip', '')
             if not os.path.exists(extracted_path):
                 print(f'Unzipping {name}...')
+                print(output_path)
                 with ZipFile(output_path, 'r') as zip_fh:
                     zip_fh.extractall(extracted_path)
 
@@ -151,6 +156,44 @@ def pre_process(config):
     # example:
     # save(args.word_emb_file, word_emb_mat, message="word embedding")
     print("Done pre-process.")
+
+
+def write_output_files(base_path, examples, dynamic_vocab):
+    # Output file is suitable for the allennlp seq2seq reader and predictor.
+    with open(base_path + '.tsv', 'w', encoding='utf-8') as fd:
+        for example in examples:
+            if dynamic_vocab:
+                output = example['source'] + '\t' + example['allowed_tokens'] + '\t' + example['target'] + '\n'
+            else:
+                output = example['source'] + '\t' + example['target'] + '\n'
+            fd.write(output)
+
+    with open(base_path + '.json', 'w', encoding='utf-8') as fd:
+        for example in examples:
+            output_dict = {'source': example['source']}
+            if dynamic_vocab:
+                output_dict['allowed_tokens'] = example['allowed_tokens']
+            fd.write(json.dumps(output_dict) + '\n')
+
+    print(base_path + '.tsv')
+    print(base_path + '.json')
+
+
+def sample_examples(examples, configuration):
+    df = pd.DataFrame(examples)
+    df["dataset"] = df.question_id.apply(lambda x: x.split('_')[0])
+
+    print("dataset distribution before sampling:")
+    print(df.groupby("dataset").agg("count"))
+    for dataset in df.dataset.unique().tolist():
+        if dataset in configuration:
+            drop_frac = 1 - configuration[dataset]
+            df = df.drop(df[df.dataset == dataset].sample(frac=drop_frac).index)
+
+    print("dataset distribution after sampling:")
+    print(df.groupby("dataset").agg("count"))
+
+    return df.to_dict(orient="records")
 
 
 if __name__ == '__main__':
