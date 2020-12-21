@@ -50,9 +50,31 @@ class <dataset_name>(data.Dataset):
     def __len__(self):
     # TODO: define the len function of the dataset and return the len.
 '''
-class Dataset(data.Dataset):
-    pass
 
+
+class Break(data.Dataset):
+    """
+    The Break dataset: https://github.com/allenai/Break
+    Args:
+        data_path (str): Path to .npz file containing pre-processed dataset.
+    """
+
+    def __init__(self, data_path):
+        super(Break, self).__init__()
+
+        dataset = np.load(data_path)
+        < init code >
+
+    def __getitem__(self, idx):
+        # TODO: retrieve a single example from the given idx location in the dataset.
+        example = None
+
+        return example
+
+    def __len__(self):
+
+
+# TODO: define the len function of the dataset and return the len.
 class AverageMeter:
     """Keep track of average values over time.
 

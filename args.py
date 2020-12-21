@@ -8,6 +8,7 @@ Edited by:
 """
 
 import argparse
+import json
 
 
 # TODO: This file includes all the command-line arguments and their default values. edit it for your needs to make
@@ -22,18 +23,25 @@ def get_setup_args():
 
     # TODO: add the URLs needed for your project, remove or add arguments as needed.
     #  Note: if all are downloaded from one of the URLs, the function setup.url_to_data_path converts the URLs to path.
-    parser.add_argument('--train_url',
+    parser.add_argument('--dataset_url',
                         type=str,
-                        default='')  # TODO: edit this
-    parser.add_argument('--dev_url',
-                        type=str,
-                        default='')  # TODO: edit this
-    parser.add_argument('--test_url',
-                        type=str,
-                        default='')  # TODO: edit this
-    parser.add_argument('--glove_url',  # TODO: may want to change this for other embeddings or remove completely.
-                        type=str,
-                        default='')  # TODO: edit this
+                        default='https://github.com/galsuchetzky/Datasets/raw/main/Break-dataset.zip',
+                        help='URL of a zip file containing the dataset')
+    parser.add_argument('--sample', type=json.loads, default="{}",
+                        help='json-formatted string with dataset down-sampling configuration, '
+                             'for example: {"ATIS": 0.5, "CLEVR": 0.2}')
+    # parser.add_argument('--train_url',
+    #                     type=str,
+    #                     default='https://github.com/allenai/Break/blob/master/break_dataset/Break-dataset.zip')
+    # parser.add_argument('--dev_url',
+    #                     type=str,
+    #                     default='')  # TODO: edit this
+    # parser.add_argument('--test_url',
+    #                     type=str,
+    #                     default='')  # TODO: edit this
+    # parser.add_argument('--glove_url',  # TODO: may want to change this for other embeddings or remove completely.
+    #                     type=str,
+    #                     default='')  # TODO: edit this
 
     """
     More arguments can be added according to need.
