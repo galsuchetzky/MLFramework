@@ -21,7 +21,6 @@ import ujson as json
 
 from collections import Counter
 
-
 # TODO: add here all your utility classes and functions.
 #  Many utility functions are left here, use the if needed or remove.
 
@@ -50,8 +49,11 @@ class <dataset_name>(data.Dataset):
     def __len__(self):
     # TODO: define the len function of the dataset and return the len.
 '''
+
+
 class Dataset(data.Dataset):
     pass
+
 
 class AverageMeter:
     """Keep track of average values over time.
@@ -523,6 +525,7 @@ def discretize(p_start, p_end, max_len=15, no_answer=False):
         end_idxs[p_no_answer > max_prob] = 0
 
     return start_idxs, end_idxs
+
 
 # TODO: Remove if not needed.
 def convert_tokens(eval_dict, qa_id, y_start_list, y_end_list, no_answer):
