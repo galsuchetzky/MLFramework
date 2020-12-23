@@ -83,7 +83,8 @@ def download(args):
     """
     downloads = []
     if args.huggingface:
-        load_dataset('break_data', 'QDMR', cache_dir='.\\data\\')
+        load_dataset('break_data', 'QDMR-lexicon', cache_dir='.\\data\\')
+        # load_dataset('break_data', cache_dir='.\\data\\')
     else:
         downloads.append(('Break Dataset', args.dataset_url))
 
