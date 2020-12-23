@@ -52,6 +52,13 @@ class <dataset_name>(data.Dataset):
     # TODO: define the len function of the dataset and return the len.
 '''
 
+def show_example_from_dataset():
+    from nlp import load_dataset
+    idx = 1000
+    dataset1 = load_dataset('break_data', 'QDMR', cache_dir='.\\data\\')
+    dataset = load_dataset('break_data', 'QDMR-lexicon', cache_dir='.\\data\\')
+    print("question:" ,dataset1['train'][idx]['question_text']); print("decomposition:", dataset1['train'][idx][
+        'decomposition']);print("allowed tokens:", dataset['train']['allowed_tokens'][idx])
 
 class Break(data.Dataset):
     """
