@@ -18,3 +18,4 @@ dependencies:
   - pandas
   - pip:
     - torch==1.0.0
+    - nlp

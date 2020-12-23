@@ -25,6 +25,7 @@ from args import get_setup_args
 from codecs import open
 from tqdm import tqdm
 from zipfile import ZipFile
+from nlp import load_dataset
 
 
 # TODO: Add to this file any preprocess logic for your dataset or anything else.
@@ -80,10 +81,11 @@ def download(args):
     Args:
         args: the command line arguments.
     """
-    downloads = [
-        ('Break Dataset', args.dataset_url),
-
-    ]
+    downloads = []
+    if args.huggingface:
+        load_dataset('break_data', 'QDMR', cache_dir='.\\data\\')
+    else:
+        downloads.append(('Break Dataset', args.dataset_url))
 
     # Download the files in the downloads list.
     for name, url in downloads:
@@ -159,10 +161,11 @@ def preprocess_input_file(input_file, lexicon_file=None, model=None):
         assert num_fields == 5
 
         for i, line in enumerate(lines):
-            if len(line) != 5:
-                print("failed to read example:", i, "which is:", line.encode())
-                continue
-            # assert len(line) == num_fields, "read {} fields, and not {}".format(len(line), num_fields)
+            # TODO: remove this, for debugging
+            # if len(line) != 5:
+            #     print("failed to read example:", i, "which is:", line.encode())
+            #     continue
+            assert len(line) == num_fields, "read {} fields, and not {}".format(len(line), num_fields)
             question_id, source, target, _, split = line
             split = get_example_split_set_from_id(question_id)
 
@@ -173,11 +176,12 @@ def preprocess_input_file(input_file, lexicon_file=None, model=None):
                 parsed = model(source)
                 example['source_parsed'] = parsed
             if lexicon:
+                # TODO: remove this, for debugging.
                 # print(example['source'].encode())
                 # print(lexicon[i]['source'].encode())
-                if not example['source'] == lexicon[i]['source']:
-                    print("failed in lexicon comparison for:", lexicon[i]['source'], "in the lexicon file.")
-                # assert example['source'] == lexicon[i]['source']
+                # if not example['source'] == lexicon[i]['source']:
+                #     print("failed in lexicon comparison for:", lexicon[i]['source'], "in the lexicon file.")
+                assert example['source'] == lexicon[i]['source']
                 example['allowed_tokens'] = lexicon[i]['allowed_tokens']
 
             examples.append(example)

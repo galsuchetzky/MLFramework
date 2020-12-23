@@ -18,6 +18,7 @@ import torch.utils.data as data
 import tqdm
 import numpy as np
 import ujson as json
+import random
 
 from collections import Counter
 
@@ -59,19 +60,35 @@ class Break(data.Dataset):
         data_path (str): Path to .npz file containing pre-processed dataset.
     """
 
-    def __init__(self, data_path):
+    def __init__(self, record_file, random_n):
         super(Break, self).__init__()
 
-        dataset = np.load(data_path)
-        < init code >
+        # Read the input file.
+        with open(record_file, 'r', encoding='utf-8') as fd:
+            lines = fd.readlines()
+
+        # If required, only sample random_n lines.
+        if random_n and len(lines) > random_n:
+            lines = random.sample(lines, random_n)
+
+        # Get questions and gold annotations.
+        lines_parts = [line.strip('\n').split('\t') for line in lines]
+        self.questions = [line_parts[0] for line_parts in lines_parts]
+
+        golds_index = 1
+        golds = [line_parts[golds_index].split('@@SEP@@') for line_parts in lines_parts]
+        self.golds = [[s.strip() for s in g] for g in golds]
+
+        # print(self.questions)
+        # print(self.golds)
 
     def __getitem__(self, idx):
         # TODO: retrieve a single example from the given idx location in the dataset.
-        example = None
-
+        example = (self.questions[idx], self.golds[idx])
         return example
 
     def __len__(self):
+        return len(self.questions)
 
 
 # TODO: define the len function of the dataset and return the len.
