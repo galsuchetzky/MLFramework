@@ -19,6 +19,7 @@ import tqdm
 import numpy as np
 import ujson as json
 import random
+from nlp import load_dataset
 
 from collections import Counter
 
@@ -52,13 +53,13 @@ class <dataset_name>(data.Dataset):
     # TODO: define the len function of the dataset and return the len.
 '''
 
-def show_example_from_dataset():
-    from nlp import load_dataset
-    idx = 1000
-    dataset1 = load_dataset('break_data', 'QDMR', cache_dir='.\\data\\')
-    dataset = load_dataset('break_data', 'QDMR-lexicon', cache_dir='.\\data\\')
-    print("question:" ,dataset1['train'][idx]['question_text']); print("decomposition:", dataset1['train'][idx][
-        'decomposition']);print("allowed tokens:", dataset['train']['allowed_tokens'][idx])
+def show_example_from_QDMR_dataset(idx):
+
+    QDMR = load_dataset('break_data', 'QDMR', cache_dir='.\\data\\')
+    lexicon = load_dataset('break_data', 'QDMR-lexicon', cache_dir='.\\data\\')
+    print("question:" ,QDMR['train'][idx]['question_text'])
+    print("decomposition:", QDMR['train'][idx]['decomposition'])
+    print("allowed tokens:", lexicon['train']['allowed_tokens'][idx])
 
 class Break(data.Dataset):
     """
