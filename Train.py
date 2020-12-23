@@ -23,7 +23,7 @@ from json import dumps
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 from ujson import load as json_load
-
+from util import Break
 
 def start_logger_and_devices(args):
     # Set up logging and devices
@@ -86,17 +86,24 @@ def main(args):
     # Get data loader
     log.info('Building dataset...')
 
-    train_dataset = None  # TODO: initialize your train dataset with the utils Dataset class.
+    train_dataset = Break(args.train_record_file, args.random_n)  # TODO: initialize your train dataset with the utils
+    # Dataset class.
     train_loader = data.DataLoader(train_dataset,
                                    batch_size=args.batch_size,
                                    shuffle=True,
                                    num_workers=args.num_workers)
-    dev_dataset = None  # TODO: initialize your dev dataset with the utils Dataset class.
+    dev_dataset = Break(args.dev_record_file, args.random_n)  # TODO: initialize your dev dataset with the utils Dataset class.
     dev_loader = data.DataLoader(dev_dataset,
                                  batch_size=args.batch_size,
                                  shuffle=False,
                                  num_workers=args.num_workers)
 
+
+    for question, annotation in train_loader:
+        print(question)
+        print(annotation)
+        pass
+    raise NotImplementedError
     # Train
     log.info('Training...')
     steps_till_eval = args.eval_steps

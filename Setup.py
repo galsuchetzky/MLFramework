@@ -30,7 +30,9 @@ from Args import get_setup_args
 from codecs import open
 from tqdm import tqdm
 from zipfile import ZipFile
+
 from Config import SetupConfig
+from nlp import load_dataset
 
 
 
@@ -88,6 +90,7 @@ def download(config):
     Args:
         config: Setup configuration.
     """
+
     print("Starting to download resources...")
 
     downloads = [
@@ -98,6 +101,13 @@ def download(config):
         #  if set, the train, dev and test sets URLs are already added.
 
     ]
+
+    # Download the Break dataset from huggingface.
+    if args.huggingface:
+        load_dataset('break_data', 'QDMR', cache_dir='.\\data\\')
+    else:
+        downloads.append(('Break Dataset', args.dataset_url))
+
 
     # Add the train, dev and test urls.
     if config.train_url:
@@ -209,6 +219,7 @@ if __name__ == '__main__':
     download(config)
 
     # Preprocess dataset
+    pre_process(config)
     pre_process(config)
 
     print("Setup finished.")
