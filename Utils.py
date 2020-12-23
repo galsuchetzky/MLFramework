@@ -23,7 +23,6 @@ from nlp import load_dataset
 
 from collections import Counter
 
-
 # TODO: add here all your utility classes and functions.
 #  Many utility functions are left here, use the if needed or remove.
 
@@ -53,13 +52,14 @@ class <dataset_name>(data.Dataset):
     # TODO: define the len function of the dataset and return the len.
 '''
 
-def show_example_from_QDMR_dataset(idx):
 
+def show_example_from_QDMR_dataset(idx):
     QDMR = load_dataset('break_data', 'QDMR', cache_dir='.\\data\\')
     lexicon = load_dataset('break_data', 'QDMR-lexicon', cache_dir='.\\data\\')
-    print("question:" ,QDMR['train'][idx]['question_text'])
+    print("question:", QDMR['train'][idx]['question_text'])
     print("decomposition:", QDMR['train'][idx]['decomposition'])
     print("allowed tokens:", lexicon['train']['allowed_tokens'][idx])
+
 
 class Break(data.Dataset):
     """
@@ -68,38 +68,24 @@ class Break(data.Dataset):
         data_path (str): Path to .npz file containing pre-processed dataset.
     """
 
-    def __init__(self, record_file, random_n):
+    def __init__(self, type):
         super(Break, self).__init__()
 
-        # Read the input file.
-        with open(record_file, 'r', encoding='utf-8') as fd:
-            lines = fd.readlines()
+        self.QDMR_dataset = load_dataset('break_data', 'QDMR', cache_dir='.\\data\\')[type]
+        self.QDMR_lexicon = load_dataset('break_data', 'QDMR-lexicon', cache_dir='.\\data\\')[type]
 
-        # If required, only sample random_n lines.
-        if random_n and len(lines) > random_n:
-            lines = random.sample(lines, random_n)
-
-        # Get questions and gold annotations.
-        lines_parts = [line.strip('\n').split('\t') for line in lines]
-        self.questions = [line_parts[0] for line_parts in lines_parts]
-
-        golds_index = 1
-        golds = [line_parts[golds_index].split('@@SEP@@') for line_parts in lines_parts]
-        self.golds = [[s.strip() for s in g] for g in golds]
-
-        # print(self.questions)
-        # print(self.golds)
+        self.questions = self.QDMR_dataset['question_text']
+        self.golds = self.QDMR_dataset['decomposition']
+        self.lexicon = self.QDMR_lexicon["allowed_tokens"]
 
     def __getitem__(self, idx):
-        # TODO: retrieve a single example from the given idx location in the dataset.
-        example = (self.questions[idx], self.golds[idx])
+        example = (self.questions[idx], self.golds[idx], self.lexicon[idx])
         return example
 
     def __len__(self):
         return len(self.questions)
 
 
-# TODO: define the len function of the dataset and return the len.
 class AverageMeter:
     """Keep track of average values over time.
 
@@ -570,6 +556,7 @@ def discretize(p_start, p_end, max_len=15, no_answer=False):
         end_idxs[p_no_answer > max_prob] = 0
 
     return start_idxs, end_idxs
+
 
 # TODO: Remove if not needed.
 def convert_tokens(eval_dict, qa_id, y_start_list, y_end_list, no_answer):
