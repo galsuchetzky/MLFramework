@@ -23,7 +23,7 @@ from json import dumps
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 from ujson import load as json_load
-
+from util import Break
 
 def main(args):
     # Set up logging and devices
@@ -41,50 +41,59 @@ def main(args):
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed_all(args.seed)
 
-    # Get embeddings
+    # Get embeddings # TODO: which embeddings do we need?
     log.info('Loading embeddings...')
-    word_vectors = util.torch_from_json(args.word_emb_file)
+    # word_vectors = util.torch_from_json(args.word_emb_file)
+    # raise NotImplementedError
+    skip = True
+    if not skip: # TODO: remove this!
+        # Get model
+        # TODO: edit this code to initialize your model
+        log.info('Building model...')
+        model = None  # TODO: edit this.
+        model = nn.DataParallel(model, args.gpu_ids)
+        if args.load_path:
+            log.info(f'Loading checkpoint from {args.load_path}...')
+            model, step = util.load_model(model, args.load_path, args.gpu_ids)
+        else:
+            step = 0
+        model = model.to(device)
+        model.train()
+        ema = util.EMA(model, args.ema_decay)
 
-    # Get model
-    # TODO: edit this code to initialize your model
-    log.info('Building model...')
-    model = None  # TODO: edit this.
-    model = nn.DataParallel(model, args.gpu_ids)
-    if args.load_path:
-        log.info(f'Loading checkpoint from {args.load_path}...')
-        model, step = util.load_model(model, args.load_path, args.gpu_ids)
-    else:
-        step = 0
-    model = model.to(device)
-    model.train()
-    ema = util.EMA(model, args.ema_decay)
+        # Get saver
+        saver = util.CheckpointSaver(args.save_dir,
+                                     max_checkpoints=args.max_checkpoints,
+                                     metric_name=args.metric_name,
+                                     maximize_metric=args.maximize_metric,
+                                     log=log)
 
-    # Get saver
-    saver = util.CheckpointSaver(args.save_dir,
-                                 max_checkpoints=args.max_checkpoints,
-                                 metric_name=args.metric_name,
-                                 maximize_metric=args.maximize_metric,
-                                 log=log)
-
-    # Get optimizer and scheduler
-    optimizer = optim.Adadelta(model.parameters(), args.lr,
-                               weight_decay=args.l2_wd)
-    scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
+        # Get optimizer and scheduler
+        optimizer = optim.Adadelta(model.parameters(), args.lr,
+                                   weight_decay=args.l2_wd)
+        scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
 
     # Get data loader
     log.info('Building dataset...')
 
-    train_dataset = None  # TODO: initialize your train dataset with the utils Dataset class.
+    train_dataset = Break(args.train_record_file, args.random_n)  # TODO: initialize your train dataset with the utils
+    # Dataset class.
     train_loader = data.DataLoader(train_dataset,
                                    batch_size=args.batch_size,
                                    shuffle=True,
                                    num_workers=args.num_workers)
-    dev_dataset = None  # TODO: initialize your dev dataset with the utils Dataset class.
+    dev_dataset = Break(args.dev_record_file, args.random_n)  # TODO: initialize your dev dataset with the utils Dataset class.
     dev_loader = data.DataLoader(dev_dataset,
                                  batch_size=args.batch_size,
                                  shuffle=False,
                                  num_workers=args.num_workers)
 
+
+    for question, annotation in train_loader:
+        print(question)
+        print(annotation)
+        pass
+    raise NotImplementedError
     # Train
     log.info('Training...')
     steps_till_eval = args.eval_steps

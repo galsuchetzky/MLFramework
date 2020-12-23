@@ -30,6 +30,10 @@ def get_setup_args():
     parser.add_argument('--sample', type=json.loads, default="{}",
                         help='json-formatted string with dataset down-sampling configuration, '
                              'for example: {"ATIS": 0.5, "CLEVR": 0.2}')
+    parser.add_argument('--huggingface',
+                        type=bool,
+                        default=False,
+                        help='include for downloading and preprocessing the break dataset with huggingface.')
     # parser.add_argument('--train_url',
     #                     type=str,
     #                     default='https://github.com/allenai/Break/blob/master/break_dataset/Break-dataset.zip')
@@ -117,6 +121,22 @@ def get_train_args():
     add_train_test_args(parser)
 
     # TODO: edit the default values here according to your project!
+    parser.add_argument('--input_file',
+                        type=str,
+                        default='data\\QDMR_train.tsv',
+                        help='path to input file')
+    parser.add_argument('--random_n',
+                        type=int,
+                        default=0,
+                        help='choose n random examples from input file')
+    parser.add_argument('--train_record_file',
+                        type=str,
+                        default='data\\QDMR_train.tsv')
+    parser.add_argument('--dev_record_file',
+                        type=str,
+                        default='data\\QDMR_dev.tsv')
+
+
     parser.add_argument('--eval_steps',
                         type=int,
                         default=50000,
