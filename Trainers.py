@@ -1,0 +1,1 @@
+# TODO add here trainer base and trainer template
