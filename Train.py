@@ -14,9 +14,9 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch.optim.lr_scheduler as sched
 import torch.utils.data as data
-import util
+import Utils
 
-from args import get_train_args
+from Args import get_train_args
 from collections import OrderedDict
 from json import dumps
 # from models import <your model> TODO: import your model.
@@ -27,10 +27,10 @@ from ujson import load as json_load
 
 def start_logger_and_devices(args):
     # Set up logging and devices
-    args.save_dir = util.get_save_dir(args.save_dir, args.name, training=True)
-    log = util.get_logger(args.save_dir, args.name)
+    args.save_dir = Utils.get_save_dir(args.save_dir, args.name, training=True)
+    log = Utils.get_logger(args.save_dir, args.name)
     tbx = SummaryWriter(args.save_dir)
-    device, args.gpu_ids = util.get_available_devices()
+    device, args.gpu_ids = Utils.get_available_devices()
     log.info(f'Args: {dumps(vars(args), indent=4, sort_keys=True)}')
     args.batch_size *= max(1, len(args.gpu_ids))
     return log, device
@@ -63,20 +63,20 @@ def main(args):
 
     if args.load_path:
         log.info(f'Loading checkpoint from {args.load_path}...')
-        model, step = util.load_model(model, args.load_path, args.gpu_ids)
+        model, step = Utils.load_model(model, args.load_path, args.gpu_ids)
     else:
         step = 0
 
     model = model.to(device)
     model.train()
-    ema = util.EMA(model, args.ema_decay)
+    ema = Utils.EMA(model, args.ema_decay)
 
     # Get saver
-    saver = util.CheckpointSaver(args.save_dir,
-                                 max_checkpoints=args.max_checkpoints,
-                                 metric_name=args.metric_name,
-                                 maximize_metric=args.maximize_metric,
-                                 log=log)
+    saver = Utils.CheckpointSaver(args.save_dir,
+                                  max_checkpoints=args.max_checkpoints,
+                                  metric_name=args.metric_name,
+                                  maximize_metric=args.maximize_metric,
+                                  log=log)
 
     # Get optimizer and scheduler
     optimizer = optim.Adadelta(model.parameters(), args.lr,
@@ -162,17 +162,17 @@ def main(args):
                     log.info('Visualizing in TensorBoard...')
                     for k, v in results.items():
                         tbx.add_scalar(f'dev/{k}', v, step)
-                    util.visualize(tbx,
-                                   pred_dict=pred_dict,
-                                   eval_path=args.dev_eval_file,
-                                   step=step,
-                                   split='dev',
-                                   num_visuals=args.num_visuals)
+                    Utils.visualize(tbx,
+                                    pred_dict=pred_dict,
+                                    eval_path=args.dev_eval_file,
+                                    step=step,
+                                    split='dev',
+                                    num_visuals=args.num_visuals)
 
 
 def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
     # TODO: edit to evaluate your model.
-    nll_meter = util.AverageMeter()
+    nll_meter = Utils.AverageMeter()
 
     model.eval()
     pred_dict = {}
@@ -194,22 +194,22 @@ def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
 
             # Get F1 and EM scores
             p1, p2 = log_p1.exp(), log_p2.exp()
-            starts, ends = util.discretize(p1, p2, max_len, use_squad_v2)
+            starts, ends = Utils.discretize(p1, p2, max_len, use_squad_v2)
 
             # Log info
             progress_bar.update(batch_size)
             progress_bar.set_postfix(NLL=nll_meter.avg)
 
-            preds, _ = util.convert_tokens(gold_dict,
-                                           ids.tolist(),
-                                           starts.tolist(),
-                                           ends.tolist(),
-                                           use_squad_v2)
+            preds, _ = Utils.convert_tokens(gold_dict,
+                                            ids.tolist(),
+                                            starts.tolist(),
+                                            ends.tolist(),
+                                            use_squad_v2)
             pred_dict.update(preds)
 
     model.train()
 
-    results = util.eval_dicts(gold_dict, pred_dict, use_squad_v2)
+    results = Utils.eval_dicts(gold_dict, pred_dict, use_squad_v2)
     results_list = [('NLL', nll_meter.avg),
                     ('F1', results['F1']),
                     ('EM', results['EM'])]

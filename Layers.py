@@ -1,4 +1,4 @@
-"""Assortment of layers for use in models.py.
+"""Assortment of layers for use in Models.py.
 
 Author:
     Chris Chute (chute@stanford.edu)

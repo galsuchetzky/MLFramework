@@ -7,12 +7,12 @@ Edited by:
     Gal Suchetzky (galsuchetzky@gmail.com)
 """
 
-import layers
+import Layers
 import torch
 import torch.nn as nn
 
 #  TODO: if you have common layers between the models or any custom layers at all, you can define these layers in the
-#   layers.py file.
+#   Layers.py file.
 
 
 # TODO: add your models here, you can use the following model template:

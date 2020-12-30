@@ -2,7 +2,7 @@
 Test a model (and generate submission CSV if requested).
 
 Usage:
-    > python test.py --split SPLIT --load_path PATH --name NAME
+    > python Test.py --split SPLIT --load_path PATH --name NAME
     where
     > SPLIT is either "dev" or "test"
     > PATH is a path to a checkpoint (e.g., save/train/model-01/best.pth.tar)
@@ -19,16 +19,16 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data as data
-import util
+import Utils
 
-from args import get_test_args
+from Args import get_test_args
 from collections import OrderedDict
 from json import dumps
 from os.path import join
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 from ujson import load as json_load
-from util import Dataset  # TODO: edit this after implementing the dataset class in utils!
+from Utils import Dataset  # TODO: edit this after implementing the dataset class in utils!
 
 
 # TODO: import the models you want to test.
@@ -36,10 +36,10 @@ from util import Dataset  # TODO: edit this after implementing the dataset class
 
 def main(args):
     # Set up logging
-    args.save_dir = util.get_save_dir(args.save_dir, args.name, training=False)
-    log = util.get_logger(args.save_dir, args.name)
+    args.save_dir = Utils.get_save_dir(args.save_dir, args.name, training=False)
+    log = Utils.get_logger(args.save_dir, args.name)
     log.info(f'Args: {dumps(vars(args), indent=4, sort_keys=True)}')
-    device, gpu_ids = util.get_available_devices()
+    device, gpu_ids = Utils.get_available_devices()
     args.batch_size *= max(1, len(gpu_ids))
 
     # TODO: load whatever is needed for testing.
@@ -52,7 +52,7 @@ def main(args):
     model = None  # TODO: Edit this.
     model = nn.DataParallel(model, gpu_ids)
     log.info(f'Loading checkpoint from {args.load_path}...')
-    model = util.load_model(model, args.load_path, gpu_ids, return_step=False)
+    model = Utils.load_model(model, args.load_path, gpu_ids, return_step=False)
     model = model.to(device)
     model.eval()
 
@@ -68,7 +68,7 @@ def main(args):
     # Evaluate
     # TODO: adjust this code to evaluate your model.
     log.info(f'Evaluating on {args.split} split...')
-    nll_meter = util.AverageMeter()
+    nll_meter = Utils.AverageMeter()
     pred_dict = {}  # Predictions for TensorBoard
     sub_dict = {}  # Predictions for submission
     eval_file = vars(args)[f'{args.split}_eval_file']
@@ -90,7 +90,7 @@ def main(args):
 
             # Get F1 and EM scores
             p1, p2 = log_p1.exp(), log_p2.exp()
-            starts, ends = util.discretize(p1, p2, args.max_ans_len, args.use_squad_v2)
+            starts, ends = Utils.discretize(p1, p2, args.max_ans_len, args.use_squad_v2)
 
             # Log info
             progress_bar.update(batch_size)
@@ -98,17 +98,17 @@ def main(args):
                 # No labels for the test set, so NLL would be invalid
                 progress_bar.set_postfix(NLL=nll_meter.avg)
 
-            idx2pred, uuid2pred = util.convert_tokens(gold_dict,
-                                                      ids.tolist(),
-                                                      starts.tolist(),
-                                                      ends.tolist(),
-                                                      args.use_squad_v2)
+            idx2pred, uuid2pred = Utils.convert_tokens(gold_dict,
+                                                       ids.tolist(),
+                                                       starts.tolist(),
+                                                       ends.tolist(),
+                                                       args.use_squad_v2)
             pred_dict.update(idx2pred)
             sub_dict.update(uuid2pred)
 
     # Log results (except for test set, since it does not come with labels)
     if args.split != 'test':
-        results = util.eval_dicts(gold_dict, pred_dict, args.use_squad_v2)
+        results = Utils.eval_dicts(gold_dict, pred_dict, args.use_squad_v2)
         results_list = [('NLL', nll_meter.avg),
                         ('F1', results['F1']),
                         ('EM', results['EM'])]
@@ -122,12 +122,12 @@ def main(args):
 
         # Log to TensorBoard
         tbx = SummaryWriter(args.save_dir)
-        util.visualize(tbx,
-                       pred_dict=pred_dict,
-                       eval_path=eval_file,
-                       step=0,
-                       split=args.split,
-                       num_visuals=args.num_visuals)
+        Utils.visualize(tbx,
+                        pred_dict=pred_dict,
+                        eval_path=eval_file,
+                        step=0,
+                        split=args.split,
+                        num_visuals=args.num_visuals)
 
     # Write submission file
     # TODO: (gal) make this code optional.

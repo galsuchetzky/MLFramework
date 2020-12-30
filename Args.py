@@ -1,5 +1,5 @@
 """
-Command-line arguments for setup.py, train.py, test.py.
+Command-line arguments for Setup.py, Train.py, Test.py.
 
 Author:
     Chris Chute (chute@stanford.edu)
@@ -15,7 +15,7 @@ import argparse
 
 
 def get_setup_args():
-    """Get arguments needed in setup.py."""
+    """Get arguments needed in Setup.py."""
     parser = argparse.ArgumentParser('Download and pre-process the dataset')
 
     add_common_args(parser)
@@ -102,7 +102,7 @@ def get_setup_args():
 
 
 def get_train_args():
-    """Get arguments needed in train.py."""
+    """Get arguments needed in Train.py."""
     parser = argparse.ArgumentParser('Train a model on the dataset')
 
     add_common_args(parser)
@@ -170,7 +170,7 @@ def get_train_args():
 
 
 def get_test_args():
-    """Get arguments needed in test.py."""
+    """Get arguments needed in Test.py."""
     parser = argparse.ArgumentParser('Test a trained model on dataset')
 
     add_common_args(parser)
@@ -191,7 +191,7 @@ def get_test_args():
                         help='Name for submission file.')
     """
 
-    # Require load_path for test.py
+    # Require load_path for Test.py
     args = parser.parse_args()
     if not args.load_path:
         raise argparse.ArgumentError(args.load_path, 'Missing required argument --load_path')
@@ -200,7 +200,7 @@ def get_test_args():
 
 
 def add_common_args(parser):
-    """Add arguments common to all 3 scripts: setup.py, train.py, test.py"""
+    """Add arguments common to all 3 scripts: Setup.py, Train.py, Test.py"""
     # TODO: put here all arguments that are required for all scripts
 
 
@@ -237,7 +237,7 @@ def add_common_args(parser):
 
 def add_train_test_args(parser):
     """
-    Add arguments common to train.py and test.py
+    Add arguments common to Train.py and Test.py
     """
     parser.add_argument('--name',
                         '-n',

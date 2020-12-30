@@ -3,7 +3,7 @@ Download and pre-process the dataset.
 
 Usage:
     > conda activate <your env name>
-    > python setup.py
+    > python Setup.py
 
 Pre-processing code adapted from:
     > https://github.com/HKUST-KnowComp/R-Net/blob/master/prepro.py
@@ -18,7 +18,7 @@ import os
 import ujson as json
 import urllib.request
 
-from args import get_setup_args
+from Args import get_setup_args
 from codecs import open
 from tqdm import tqdm
 from zipfile import ZipFile
