@@ -16,6 +16,10 @@ dependencies:
   - urllib3
   - pytorch=1.0.0
   - pandas
+  - networkx
   - pip:
     - torch==1.0.0
     - nlp
+    - neuralcoref
+    - edit_distance
+    - progressbar
