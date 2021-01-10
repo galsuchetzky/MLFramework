@@ -18,63 +18,38 @@ import Utils
 
 from Args import get_train_args
 from collections import OrderedDict
-from json import dumps
 # from models import <your model> TODO: import your model.
+from Models import NerBiLstmModel
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 from ujson import load as json_load
+from Config import TrainConfig
 
-# TODO move to utils
-def start_logger_and_devices(args):
-    # Set up logging and devices
-    args.save_dir = Utils.get_save_dir(args.save_dir, args.name, training=True)
-    log = Utils.get_logger(args.save_dir, args.name)
-    tbx = SummaryWriter(args.save_dir)
-    device, args.gpu_ids = Utils.get_available_devices()
-    log.info(f'Args: {dumps(vars(args), indent=4, sort_keys=True)}')
-    args.batch_size *= max(1, len(args.gpu_ids))
-    return log, device
-
-# TODO move to utils
-def set_seed(args, log):
-    # Set random seed
-    log.info(f'Using random seed {args.seed}...')
-    random.seed(args.seed)
-    np.random.seed(args.seed)
-    torch.manual_seed(args.seed)
-    torch.cuda.manual_seed_all(args.seed)
-
+from Evaluators import Evaluator, Predictor
+from Trainers import Trainer
 
 def main(args):
+    # Get train configuration
+    config = TrainConfig(args)
+
     # Setup
-    log, device = start_logger_and_devices(args)
-    set_seed(args, log)
+    logger, device = Utils.setup_run(args)
+
     # TODO: add setup code, for example load word vectors, etc...
 
-    # # Get embeddings
-    # log.info('Loading embeddings...')
-    # word_vectors = util.torch_from_json(args.word_emb_file)
-
-    # Initialize model
     # TODO: edit this code to initialize your model
-    # log.info('Building model...')
-    # model = None  # TODO: edit this.
-    # model = nn.DataParallel(model, args.gpu_ids)
-
-    # if args.load_path:
-    #     log.info(f'Loading checkpoint from {args.load_path}...')
-    #     model, step = Utils.load_model(model, args.load_path, args.gpu_ids)
-    # else:
-    #     step = 0
-
-    # model = model.to(device)
-    # model.train()
-    # ema = Utils.EMA(model, args.ema_decay)
 
     # Initialize model
-    logger.info("Initializing model...", )
-    model = NerBiLstmModel(helper, config, embeddings)
+    logger.info("Initializing model...")
+    model = NerBiLstmModel(config, embeddings)
     model.to(config.device)
+
+    if config.load_path:
+        logger.info(f'Loading checkpoint from {config.load_path}...')
+        model, step = Utils.load_model(model, config.load_path, config.gpu_ids)
+    else:
+        step = 0
+
 
     # TODO get everything from config, not args
     # Get saver
@@ -82,7 +57,7 @@ def main(args):
                                   max_checkpoints=args.max_checkpoints,
                                   metric_name=args.metric_name,
                                   maximize_metric=args.maximize_metric,
-                                  log=log)
+                                  log=logger)
 
     # # Get optimizer and scheduler
     # optimizer = optim.Adadelta(model.parameters(), args.lr,

@@ -13,6 +13,7 @@ TODOs:
 """
 
 import os
+import Utils
 
 from datetime import datetime
 from Defaults import *
@@ -72,7 +73,14 @@ class TrainConfig:
     """
 
     def __init__(self, args):
-        pass
+        # Get the device and the avaliable GPU ids.
+        self.device, self.gpu_ids = Utils.get_available_devices()
+
+        # Define the path from which to load the Models.
+        if 'load_path' in args:
+            self.load_path = args.load_path
+
+
 
 
 class TestConfig:

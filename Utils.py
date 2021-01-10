@@ -14,10 +14,11 @@ import shutil
 import string
 import torch
 import torch.nn.functional as F
-import torch.utils.data as data
 import tqdm
 import numpy as np
 import ujson as json
+from json import dumps
+from tensorboardX import SummaryWriter
 
 from collections import Counter
 
@@ -25,33 +26,6 @@ from collections import Counter
 # TODO: add here all your utility classes and functions.
 #  Many utility functions are left here, use the if needed or remove.
 
-# TODO: add a dataset class here that manages the reading of the examples from the dataset.
-#  you can use the following template:
-'''
-class <dataset_name>(data.Dataset):
-    """
-    <dataset description>
-    Args:
-        data_path (str): Path to .npz file containing pre-processed dataset.
-    """
-    def __init__(self, data_path):
-        super(<dataset_name>, self).__init__()
-
-        dataset = np.load(data_path)
-        <init code>
-
-        
-    def __getitem__(self, idx):
-        # TODO: retrieve a single example from the given idx location in the dataset.
-        example = None
-
-        return example
-
-    def __len__(self):
-    # TODO: define the len function of the dataset and return the len.
-'''
-class Dataset(data.Dataset):
-    pass
 
 class AverageMeter:
     """Keep track of average values over time.
@@ -82,54 +56,54 @@ class AverageMeter:
         self.avg = self.sum / self.count
 
 
-class EMA:
-    """Exponential moving average of model parameters.
-    Args:
-        model (torch.nn.Module): Model with parameters whose EMA will be kept.
-        decay (float): Decay rate for exponential moving average.
-    """
-
-    def __init__(self, model, decay):
-        self.decay = decay
-        self.shadow = {}
-        self.original = {}
-
-        # Register model parameters
-        for name, param in model.named_parameters():
-            if param.requires_grad:
-                self.shadow[name] = param.data.clone()
-
-    def __call__(self, model, num_updates):
-        decay = min(self.decay, (1.0 + num_updates) / (10.0 + num_updates))
-        for name, param in model.named_parameters():
-            if param.requires_grad:
-                assert name in self.shadow
-                new_average = \
-                    (1.0 - decay) * param.data + decay * self.shadow[name]
-                self.shadow[name] = new_average.clone()
-
-    def assign(self, model):
-        """Assign exponential moving average of parameter values to the
-        respective parameters.
-        Args:
-            model (torch.nn.Module): Model to assign parameter values.
-        """
-        for name, param in model.named_parameters():
-            if param.requires_grad:
-                assert name in self.shadow
-                self.original[name] = param.data.clone()
-                param.data = self.shadow[name]
-
-    def resume(self, model):
-        """Restore original parameters to a model. That is, put back
-        the values that were in each parameter at the last call to `assign`.
-        Args:
-            model (torch.nn.Module): Model to assign parameter values.
-        """
-        for name, param in model.named_parameters():
-            if param.requires_grad:
-                assert name in self.shadow
-                param.data = self.original[name]
+# class EMA:
+#     """Exponential moving average of model parameters.
+#     Args:
+#         model (torch.nn.Module): Model with parameters whose EMA will be kept.
+#         decay (float): Decay rate for exponential moving average.
+#     """
+#
+#     def __init__(self, model, decay):
+#         self.decay = decay
+#         self.shadow = {}
+#         self.original = {}
+#
+#         # Register model parameters
+#         for name, param in model.named_parameters():
+#             if param.requires_grad:
+#                 self.shadow[name] = param.data.clone()
+#
+#     def __call__(self, model, num_updates):
+#         decay = min(self.decay, (1.0 + num_updates) / (10.0 + num_updates))
+#         for name, param in model.named_parameters():
+#             if param.requires_grad:
+#                 assert name in self.shadow
+#                 new_average = \
+#                     (1.0 - decay) * param.data + decay * self.shadow[name]
+#                 self.shadow[name] = new_average.clone()
+#
+#     def assign(self, model):
+#         """Assign exponential moving average of parameter values to the
+#         respective parameters.
+#         Args:
+#             model (torch.nn.Module): Model to assign parameter values.
+#         """
+#         for name, param in model.named_parameters():
+#             if param.requires_grad:
+#                 assert name in self.shadow
+#                 self.original[name] = param.data.clone()
+#                 param.data = self.shadow[name]
+#
+#     def resume(self, model):
+#         """Restore original parameters to a model. That is, put back
+#         the values that were in each parameter at the last call to `assign`.
+#         Args:
+#             model (torch.nn.Module): Model to assign parameter values.
+#         """
+#         for name, param in model.named_parameters():
+#             if param.requires_grad:
+#                 assert name in self.shadow
+#                 param.data = self.original[name]
 
 
 class CheckpointSaver:
@@ -230,6 +204,13 @@ class CheckpointSaver:
                 # Avoid crashing if checkpoint has been removed or protected
                 pass
 
+def set_seed(args, log):
+    # Set random seed
+    log.info(f'Using random seed {args.seed}...')
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed_all(args.seed)
 
 def load_model(model, checkpoint_path, gpu_ids, return_step=True):
     """Load model parameters from disk.
@@ -274,6 +255,110 @@ def get_available_devices():
 
     return device, gpu_ids
 
+
+
+class Progbar(object):
+    """
+    Progbar class copied from keras (https://github.com/fchollet/keras/)
+    Displays a progress bar.
+    # Arguments
+        target: Total number of steps expected.
+        interval: Minimum visual progress update interval (in seconds).
+    """
+
+    def __init__(self, target, width=30, verbose=1):
+        self.width = width
+        self.target = target
+        self.sum_values = {}
+        self.unique_values = []
+        self.start = time.time()
+        self.total_width = 0
+        self.seen_so_far = 0
+        self.verbose = verbose
+
+    def update(self, current, values=None, exact=None):
+        """
+        Updates the progress bar.
+        # Arguments
+            current: Index of current step.
+            values: List of tuples (name, value_for_last_step).
+                The progress bar will display averages for these values.
+            exact: List of tuples (name, value_for_last_step).
+                The progress bar will display these values directly.
+        """
+        values = values or []
+        exact = exact or []
+
+        for k, v in values:
+            if k not in self.sum_values:
+                self.sum_values[k] = [v * (current - self.seen_so_far), current - self.seen_so_far]
+                self.unique_values.append(k)
+            else:
+                self.sum_values[k][0] += v * (current - self.seen_so_far)
+                self.sum_values[k][1] += (current - self.seen_so_far)
+        for k, v in exact:
+            if k not in self.sum_values:
+                self.unique_values.append(k)
+            self.sum_values[k] = [v, 1]
+        self.seen_so_far = current
+
+        now = time.time()
+        if self.verbose == 1:
+            prev_total_width = self.total_width
+            sys.stdout.write("\b" * prev_total_width)
+            sys.stdout.write("\r")
+
+            numdigits = int(np.floor(np.log10(self.target))) + 1
+            barstr = '%%%dd/%%%dd [' % (numdigits, numdigits)
+            bar = barstr % (current, self.target)
+            prog = float(current)/self.target
+            prog_width = int(self.width*prog)
+            if prog_width > 0:
+                bar += ('='*(prog_width-1))
+                if current < self.target:
+                    bar += '>'
+                else:
+                    bar += '='
+            bar += ('.'*(self.width-prog_width))
+            bar += ']'
+            sys.stdout.write(bar)
+            self.total_width = len(bar)
+
+            if current:
+                time_per_unit = (now - self.start) / current
+            else:
+                time_per_unit = 0
+            eta = time_per_unit*(self.target - current)
+            info = ''
+            if current < self.target:
+                info += ' - ETA: %ds' % eta
+            else:
+                info += ' - %ds' % (now - self.start)
+            for k in self.unique_values:
+                if isinstance(self.sum_values[k], list):
+                    info += ' - %s: %.4f' % (k, self.sum_values[k][0] / max(1, self.sum_values[k][1]))
+                else:
+                    info += ' - %s: %s' % (k, self.sum_values[k])
+
+            self.total_width += len(info)
+            if prev_total_width > self.total_width:
+                info += ((prev_total_width-self.total_width) * " ")
+
+            sys.stdout.write(info)
+            sys.stdout.flush()
+
+            if current >= self.target:
+                sys.stdout.write("\n")
+
+        if self.verbose == 2:
+            if current >= self.target:
+                info = '%ds' % (now - self.start)
+                for k in self.unique_values:
+                    info += ' - %s: %.4f' % (k, self.sum_values[k][0] / max(1, self.sum_values[k][1]))
+                sys.stdout.write(info + "\n")
+
+    def add(self, n, values=None):
+        self.update(self.seen_so_far+n, values)
 
 def masked_softmax(logits, mask, dim=-1, log_softmax=False):
     """Take the softmax of `logits` over given dimension, and set
@@ -387,6 +472,18 @@ def get_save_dir(base_dir, name, training, id_max=100):
 
     raise RuntimeError('Too many save directories created with the same name. \
                        Delete old save directories or use another name.')
+
+def setup_run(args):
+    # Set up logging and devices
+    args.save_dir = Utils.get_save_dir(args.save_dir, args.name, training=True)
+    log = Utils.get_logger(args.save_dir, args.name)
+    tbx = SummaryWriter(args.save_dir)
+    device, args.gpu_ids = Utils.get_available_devices()
+    log.info(f'Args: {dumps(vars(args), indent=4, sort_keys=True)}')
+    args.batch_size *= max(1, len(args.gpu_ids))
+
+    set_seed(args, log)
+    return log, device
 
 
 def get_logger(log_dir, name):

@@ -1,3 +1,46 @@
+import torch.utils.data as data
+import numpy as np
+
+from Defaults import *
+
+
+# TODO: add a dataset class here that manages the reading of the examples from the dataset.
+#  you can use the following template:
+class DatasetName(data.Dataset):
+	"""
+	<dataset description>
+	Args:
+		data_path (str): Path to .npz file containing pre-processed dataset.
+	"""
+
+	def __init__(self, data_path):
+		super(DatasetName, self).__init__()
+
+		self.dataset = np.load(data_path)
+		# TODO add init code here
+
+	def __getitem__(self, idx=-1):
+		# TODO: retrieve a single example from the given idx location in the dataset.
+		example = None
+
+		return example
+
+	def __len__(self):
+		# TODO: define the  and return the len.
+		pass
+
+	def get_minibatch(self, minibatch_size=DEFAULT_MINIBATCH_SIZE):
+		# TODO return a minibatch of examples
+		pass
+
+	def get_example(self, idx=-1):
+		if idx == -1:
+			idx = np.random.randint(len(self))
+		return self.__getitem__(idx)
+
+
+# TODO authors are these below necessary??
+
 class BaseDataPreprocessor:
 	def __init__(self, model, config, helper):
 		self._max_length = model._max_length
@@ -89,3 +132,50 @@ class DataPreprocessor(BaseDataPreprocessor):
 			ret.append((padded_sentence, padded_labels, mask))
 		### END YOUR CODE
 		return ret
+
+
+def get_minibatches(data, minibatch_size, shuffle=True):
+	"""
+	Iterates through the provided data one minibatch at at time. You can use this function to
+	iterate through data in minibatches as follows:
+
+		for inputs_minibatch in get_minibatches(inputs, minibatch_size):
+			...
+
+	Or with multiple data sources:
+
+		for inputs_minibatch, labels_minibatch in get_minibatches([inputs, labels], minibatch_size):
+			...
+
+	Args:
+		data: there are two possible values:
+			- a list or numpy array
+			- a list where each element is either a list or numpy array
+		minibatch_size: the maximum number of items in a minibatch
+		shuffle: whether to randomize the order of returned data
+	Returns:
+		minibatches: the return value depends on data:
+			- If data is a list/array it yields the next minibatch of data.
+			- If data a list of lists/arrays it returns the next minibatch of each element in the
+			  list. This can be used to iterate through multiple data sources
+			  (e.g., features and labels) at the same time.
+
+	"""
+	list_data = type(data) is list and (type(data[0]) is list or type(data[0]) is np.ndarray)
+	data_size = len(data[0]) if list_data else len(data)
+	indices = np.arange(data_size)
+	if shuffle:
+		np.random.shuffle(indices)
+	for minibatch_start in np.arange(0, data_size, minibatch_size):
+		minibatch_indices = indices[minibatch_start:minibatch_start + minibatch_size]
+		yield [minibatch(d, minibatch_indices) for d in data] if list_data \
+			else minibatch(data, minibatch_indices)
+
+
+def minibatch(data, minibatch_idx):
+	return data[minibatch_idx] if type(data) is np.ndarray else [data[i] for i in minibatch_idx]
+
+
+def minibatches(data, batch_size, shuffle=True):
+	batches = [np.array(col) for col in zip(*data)]
+	return get_minibatches(batches, batch_size, shuffle)

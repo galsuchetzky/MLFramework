@@ -15,7 +15,6 @@ import Layers
 import torch
 import torch.nn as nn
 
-
 # TODO: add your models here, you can use the following implementation template:
 """
 class <model name>(nn.Module):
