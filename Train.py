@@ -24,6 +24,9 @@ from tensorboardX import SummaryWriter
 from tqdm import tqdm
 from ujson import load as json_load
 
+def try_to_change(a):
+    a =a+1
+    return a
 
 def start_logger_and_devices(args):
     # Set up logging and devices
