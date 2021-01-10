@@ -1,0 +1,6 @@
+create function to translate logical form to QDMR
+download the logical form set
+define functions to view examples from the dataset
+implement a base model for seq2seq
+take and adapt the base model from Break
+take the seq2seq model
