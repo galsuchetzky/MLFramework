@@ -22,14 +22,9 @@ TODOs:
 import os
 import ujson as json
 import urllib.request
-import csv
-import re
-import pandas as pd
 
-from Args import get_setup_args
 from codecs import open
 from tqdm import tqdm
-from zipfile import ZipFile
 
 from Config import SetupConfig
 from Args import get_setup_args

@@ -60,9 +60,7 @@ class SetupConfig:
 
     def __init__(self, args):
         # Get the URLs for the datasets to download
-        self.train_url = args.train_url
-        self.dev_url = args.dev_url
-        self.test_url = args.test_url
+        self.dataset_url = args.dataset_url
         self.data_path = args.data_path
 
 

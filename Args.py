@@ -29,13 +29,7 @@ def get_setup_args():
     #  Note: if all are downloaded from one of the URLs, the function setup.url_to_data_path converts the URLs to path.
     parser.add_argument('--dataset_url',
                         type=str,
-                        default=DEFAULT_TRAIN_URL)
-    parser.add_argument('--dev_url',
-                        type=str,
-                        default=DEFAULT_DEV_URL)
-    parser.add_argument('--test_url',
-                        type=str,
-                        default=DEFAULT_TEST_URL)
+                        default=DEFAULT_DATASET_URL)
     parser.add_argument('--data_path',
                         type=str,
                         default=DEFAULT_DATA_PATH)
