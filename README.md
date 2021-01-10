@@ -75,10 +75,18 @@ Usage: <br>
 
 
 ### Models.py
-todo: add explanation and usage details
+This file will contain the architecture of the models used in the project. <br>
+The template is for pytorch based models, for additional information about pytorch see https://pytorch.org/docs/stable/
+
+Usage: <br>
+- Implement your models in this file using the supplied pytorch template.
 
 ### Layers.py
-todo: add explanation and usage details
+This file will contain all the custom layers of your models. <br>
+Use this file to maintain readability in the Models.py file.
+
+Usage: <br>
+- Implement your custom layers in this file using the supplied pytorch template.
 
 ### Trainers.py
 todo: add explanation and usage details
