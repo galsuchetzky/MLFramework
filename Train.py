@@ -57,19 +57,24 @@ def main(args):
 
     # Initialize model
     # TODO: edit this code to initialize your model
-    log.info('Building model...')
+    # log.info('Building model...')
     # model = None  # TODO: edit this.
     # model = nn.DataParallel(model, args.gpu_ids)
 
-    if args.load_path:
-        log.info(f'Loading checkpoint from {args.load_path}...')
-        model, step = Utils.load_model(model, args.load_path, args.gpu_ids)
-    else:
-        step = 0
+    # if args.load_path:
+    #     log.info(f'Loading checkpoint from {args.load_path}...')
+    #     model, step = Utils.load_model(model, args.load_path, args.gpu_ids)
+    # else:
+    #     step = 0
 
-    model = model.to(device)
-    model.train()
-    ema = Utils.EMA(model, args.ema_decay)
+    # model = model.to(device)
+    # model.train()
+    # ema = Utils.EMA(model, args.ema_decay)
+
+    # Initialize model
+    logger.info("Initializing model...", )
+    model = NerBiLstmModel(helper, config, embeddings)
+    model.to(config.device)
 
     # TODO get everything from config, not args
     # Get saver
@@ -79,10 +84,10 @@ def main(args):
                                   maximize_metric=args.maximize_metric,
                                   log=log)
 
-    # Get optimizer and scheduler
-    optimizer = optim.Adadelta(model.parameters(), args.lr,
-                               weight_decay=args.l2_wd)
-    scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
+    # # Get optimizer and scheduler
+    # optimizer = optim.Adadelta(model.parameters(), args.lr,
+    #                            weight_decay=args.l2_wd)
+    # scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
 
     # Get data loader
     log.info('Building dataset...')

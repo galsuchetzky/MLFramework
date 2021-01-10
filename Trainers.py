@@ -67,6 +67,7 @@ class Trainer(TrainerBase):
 		self._loss_function = torch.nn.NLLLoss()
 		### END YOUR CODE
 		self._optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
+		# scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
 
 	def _train_on_batch(self, sentences, labels, masks):
 		model = self._model
