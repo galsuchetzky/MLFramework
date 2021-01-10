@@ -166,8 +166,6 @@ if __name__ == '__main__':
     download(config)
 
     # Preprocess dataset
-    # TODO: add to the config anything else required for the preprocessing of your data.
-    #  change Args.py, Defaults.py and Config.py accordingly.
     pre_process(config)
 
     print("Setup finished.")

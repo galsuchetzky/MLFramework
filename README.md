@@ -33,14 +33,46 @@ you should run `activate MLFramework` to activate the environment.
 
 todo: add anaconda installation details, basic commands, package installation details.
 
+### Defaults.py
+This file contains the list of default values, as well as all the project constants. <br>
+
+Usage:<br>
+- Add to that file all the default values for the command line arguments (see Args.py below) and any project constants.
+
 ### Args.py
-todo: add explanation and usage details
+This file is defining all the command line arguments for the all scripts in the project.
+For example, the command line arguments that specify the sources for the dataset, the learning rate and the data 
+paths. <br>
+The file contains basic arguments, and many more examples for possible arguments, and you may change these according 
+to need.
+The argument parsing is based on the argparse library.
+
+Usage: <br>
+In the file itself you will find examples for arguments as well as documentation and explanation on adding new 
+arguments.
+
 
 ### Config.py
-todo: add explanation and usage details
+This file contains the configuration classes for the project.<br>
+Each config class takes care of parsing the command-line arguments that are relevant to it.
+Currently, there are 3 config classes it this file: SetupConfig, TrainConfig, TestConfig.
+
+Usage:
+- If necessary, add more config classes.
+- Edit the SetupConfig, TrainConfig and TestConfig classes to parse all the arguments relevant to this class.
+- Make sure to include processing for any additional arguments that you have added to the Args.py file.
 
 ### Setup.py
-todo: add explanation and usage details
+This file is the setup script for the project. <br>
+Here, all the required resources for the project will be downloaded, including the dataset.
+Additionally, the preprocessing of the dataset will occur here as well.<br>
+Note that this script will only run once.
+
+Usage: <br>
+- Edit the Args.py to include arguments to receive the resources parameters that are needed.
+- Edit the download function to correctly download the resources (more details in the function).
+- Edit the pre_process function to perform preprocessing to your downloaded dataset.
+
 
 ### Models.py
 todo: add explanation and usage details

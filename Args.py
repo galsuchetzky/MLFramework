@@ -5,14 +5,18 @@ Author:
     Chris Chute (chute@stanford.edu)
 Edited by:
     Gal Suchetzky (galsuchetzky@gmail.com)
+
+For additional information on argparse, see:
+https://docs.python.org/3/library/argparse.html
+
+TODOs:
+-   Add here all the command line arguments required for your project.
+-   Add all their default arguments to the Defaults.py file.
+-   Edit the classes in Config.py to parse correctly the newly added arguments.
 """
 
 import argparse
 from Defaults import *
-
-
-# TODO: This file includes all the command-line arguments and their default values. edit it for your needs to make
-#  the running of your system the coms convenient for you.
 
 
 def get_setup_args():

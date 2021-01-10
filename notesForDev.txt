@@ -1,5 +1,4 @@
 complete the README for the framework
-move all the defaults to the config file
 instead of moving around the args element, create a config file with args and move that
 add in each file usage intent and examples at the beginnings
 Setup - create config instead of using args
