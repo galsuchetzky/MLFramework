@@ -1,4 +1,8 @@
-# ML template
+# ML project template
+Authors:
+- Gal Suchetzky (galsuchetzky@gmail.com)
+
+
 This project is a template project for a general deep learning project. <br>
 It provides a base architecture for the project as well as some useful functions and code, <br>
 such as:
@@ -100,7 +104,9 @@ todo: add explanation and usage details
 ### Utils.py
 todo: add explanation and usage details
 
-
+## Framework usage
+todo: Add explanation and recommendation for how one might go about implementing a project based of this template 
+implementation - from which files to start, how to run training, how to test, how to setup the environment...
 ## Setup
 
 1. Make sure you have [Miniconda](https://docs.conda.io/en/latest/miniconda.html) installed
