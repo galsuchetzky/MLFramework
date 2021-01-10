@@ -1,0 +1,12 @@
+go over and understand the framework
+complete the README for the framework
+move all the defaults to the config file
+instead of moving around the args element, create a config file with args and move that
+add in each file usage intent and examples at the beginnigs
+Setup - create config instead of using args
+Trainers - get trainer template from ex3 q5
+Train - change to use config and trainers
+Test - 
+Evaluator - evalution functions
+Inspector - saves error and gold examples for model debugging
+Utils - document, clean, separate to generes
