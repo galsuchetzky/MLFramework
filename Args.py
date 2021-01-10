@@ -8,6 +8,7 @@ Edited by:
 """
 
 import argparse
+from Defaults import *
 
 
 # TODO: This file includes all the command-line arguments and their default values. edit it for your needs to make
@@ -24,21 +25,24 @@ def get_setup_args():
     #  Note: if all are downloaded from one of the URLs, the function setup.url_to_data_path converts the URLs to path.
     parser.add_argument('--train_url',
                         type=str,
-                        default='')  # TODO: edit this
+                        default=DEFAULT_TRAIN_URL)
     parser.add_argument('--dev_url',
                         type=str,
-                        default='')  # TODO: edit this
+                        default=DEFAULT_DEV_URL)
     parser.add_argument('--test_url',
                         type=str,
-                        default='')  # TODO: edit this
-    parser.add_argument('--glove_url',  # TODO: may want to change this for other embeddings or remove completely.
+                        default=DEFAULT_TEST_URL)
+    parser.add_argument('--data_path',
                         type=str,
-                        default='')  # TODO: edit this
+                        default=DEFAULT_DATA_PATH)
 
     """
     More arguments can be added according to need.
     
     examples:
+    parser.add_argument('--glove_url',
+                        type=str,
+                        default='')
     parser.add_argument('--dev_meta_file',
                         type=str,
                         default='./data/dev_meta.json')
@@ -90,12 +94,12 @@ def get_setup_args():
                         type=int,
                         default=16,
                         help='Max number of chars to keep from a word')
-    """
+    
     parser.add_argument('--include_test_examples',
                         type=lambda s: s.lower().startswith('t'),
                         default=True,
                         help='Process examples from the test set')
-
+    """
     args = parser.parse_args()
 
     return args

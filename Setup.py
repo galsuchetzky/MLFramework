@@ -3,7 +3,7 @@ Download and pre-process the dataset.
 
 Usage:
     > conda activate <your env name>
-    > python Setup.py
+    > python Setup.py <args>
 
 Pre-processing code adapted from:
     > https://github.com/HKUST-KnowComp/R-Net/blob/master/prepro.py
@@ -12,6 +12,11 @@ Author:
     Chris Chute (chute@stanford.edu)
 Edited by:
     Gal Suchetzky (galsuchetzky@gmail.com)
+
+TODOs:
+-   Before and while updating this file, update the Args.py file to include arguments
+    for this file and edit the SetupConfig class in Config.py to handle the new arguments.
+-   Add your preprocess code.
 """
 
 import os
@@ -22,6 +27,8 @@ from Args import get_setup_args
 from codecs import open
 from tqdm import tqdm
 from zipfile import ZipFile
+from Config import SetupConfig
+
 
 # TODO: Add to this file any preprocess logic for your dataset or anything else.
 # Note: This file will only run once before starting to work on the project, so make sure to include here anything
@@ -59,33 +66,46 @@ def download_url(url, output_path, show_progress=True):
         urllib.request.urlretrieve(url, output_path)
 
 
-def url_to_data_path(url):
+def url_to_data_path(config, url):
     """
     Convert the given data URL to a file path in the data folder.
     Args:
+        config: Setup configuration.
         url: The URL to convert.
 
     Returns: The path of the data file.
     """
-    return os.path.join('./data/', url.split('/')[-1])
+    return os.path.join(config.data_path, url.split('/')[-1])
 
 
-def download(args):
+def download(config):
     """
     Downloads the required data according to the urls given in the arguments.
     Args:
-        args: the command line arguments.
+        config: Setup configuration.
     """
+    print("Starting to download resources...")
+
     downloads = [
 
         # TODO: add your downloads here in the following format:
-        # ('name', args.<arg>_url),
+        #  ('name', config.url),
+        #  don't forget to update the args and the SetupConfig
+        #  if set, the train, dev and test sets URLs are already added.
 
     ]
 
+    # Add the train, dev and test urls.
+    if config.train_url:
+        downloads.append(('train_set', config.train_url))
+    if config.dev_url:
+        downloads.append(('dev_set', config.dev_url))
+    if config.test_url:
+        downloads.append(('test_set', config.test_url))
+
     # Download the files in the downloads list.
     for name, url in downloads:
-        output_path = url_to_data_path(url)
+        output_path = url_to_data_path(config, url)
         if not os.path.exists(output_path):
             print(f'Downloading {name}...')
             download_url(url, output_path)
@@ -98,6 +118,7 @@ def download(args):
                     zip_fh.extractall(extracted_path)
 
     # TODO: add here any other downloading logic, for example: spacy language model
+    print("Done downloading resources.")
 
 
 def save(filename, obj, message=None):
@@ -116,32 +137,37 @@ def save(filename, obj, message=None):
         json.dump(obj, fh)
 
 
-def pre_process(args):
+def pre_process(config):
     """
     Preprocess your dataset.
     Args:
-        args: all arguments recived by the user as well ad the default ones.
+        config: The setup configuration, you can find there anything needed for the preprocess.
     """
+    print("Starting pre-process..")
     # TODO: add your preprocess code here.
-    pass
+    #  make sure to edit Config.py according to your needs.
 
     # Note: after preprocessing, you can save the preprocessed results in a json file using the save function.
     # example:
     # save(args.word_emb_file, word_emb_mat, message="word embedding")
+    print("Done pre-process.")
 
 
 if __name__ == '__main__':
+    print("running Setup.py...")
+
     # Get command-line args
-    args_ = get_setup_args()
+    args = get_setup_args()
+
+    # Generate the setup configuration
+    config = SetupConfig(args)
 
     # Download resources
-    download(args_)
+    download(config)
 
     # Preprocess dataset
-    # TODO: add any required paths for preprocess to args_.
+    # TODO: add to the config anything else required for the preprocessing of your data.
+    #  change Args.py, Defaults.py and Config.py accordingly.
+    pre_process(config)
 
-    if args_.include_test_examples:  # If should include the test examples in the preprocess.
-        args_.test_file = url_to_data_path(args_.test_url)
-
-    # TODO: add to args_ anything else required for the preprocessing of your data.
-    pre_process(args_)
+    print("Setup finished.")
