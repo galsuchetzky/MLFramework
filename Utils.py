@@ -486,6 +486,17 @@ def setup_run(args):
     return log, device
 
 
+def write_eval_to_file(output, model):
+    sentences, labels, predictions = zip(*output)
+    predictions = [[LBLS[l] for l in preds] for preds in predictions]
+    output = list(zip(sentences, labels, predictions))
+
+    with open(model.config.conll_output, 'w') as f:
+        write_conll(f, output)
+    with open(model.config.eval_output, 'w') as f:
+        for sentence, labels, predictions in output:
+            print_sentence(f, sentence, labels, predictions)
+
 def get_logger(log_dir, name):
     """Get a `logging.Logger` instance that prints to the console
     and an auxiliary file.

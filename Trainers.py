@@ -18,9 +18,27 @@ import torch
 from Utils import Progbar, minibatches
 from Evaluators import Evaluator, Predictor
 
+class TrainerBase:
+	def __init__(self, model, config, logger):
+		self._model = model
+		self._config = config
+		self._logger = logger
+
+		# For evaluating the model predictions.
+		self._evaluator = Evaluator(Predictor(model, config))
+
+	def train(self, train_loader, dev_loader):
+		model = self._model
+		config = self._config
+		logger = self._logger
+
+		# For keeping track of the best score while training.
+		best_score = 0.
+
+
 # TODO add here trainer base and trainer template
 class TrainerBase:
-	def __init__(self, model, config, helper, logger):
+	def __init__(self, model, config, logger):
 		self._model = model
 		self._config = config
 		# self._helper = helper
@@ -29,7 +47,7 @@ class TrainerBase:
 		# For evaluating the model predictions.
 		self._evaluator = Evaluator(Predictor(model, config))
 
-	def train(self, train_examples, dev_examples):
+	def train(self, train_loader, dev_loader):
 		model = self._model
 		config = self._config
 		logger = self._logger
@@ -82,7 +100,7 @@ class TrainerBase:
 
 
 class Trainer(TrainerBase):
-	def __init__(self, model, config, helper, logger):
+	def __init__(self, model, config, logger):
 		"""
 		- Define the cross entropy loss function in self._loss_function.
 		  It will be used in _batch_loss.
@@ -90,12 +108,12 @@ class Trainer(TrainerBase):
 		Hints:
 		- Don't use automatically PyTorch's CrossEntropyLoss - read its documentation first
 		"""
-		super(Trainer, self).__init__(model, config, helper, logger)
+		super(Trainer, self).__init__(model, config, logger)
 
 		self._loss_function = torch.nn.NLLLoss()
 		self._optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
 
-		# scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
+	# scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
 
 	def _get_batch_args(self, minibatch):
 		config = self._config
@@ -142,6 +160,3 @@ class Trainer(TrainerBase):
 		masked_tag_probs = torch.transpose(masked_tag_probs, dim0=1, dim1=2)
 		loss = self._loss_function(masked_tag_probs, masked_labels)
 		return loss
-
-
-
